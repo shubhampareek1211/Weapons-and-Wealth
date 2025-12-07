@@ -2,4 +2,102 @@
 
 ## Description
 
+This project draws on two main data sources: the World Bank's World Development Indicators (WDI) and SIPRI's military expenditure and arms transfers databases. The WDI series on military expenditure as a share of GDP (MS.MIL.XPND.GD.ZS) and GDP per capita (NY.GDP.PCAP.CD) are compiled annually from national statistical offices, ministries of finance/defense, and international organizations, provided as CSV files with countries as rows and years as columns (1960–2024). SIPRI's military expenditure database (SIPRI-Milex-data-1949-2024.xlsx) is compiled by researchers who harmonize official budget documents, defense reports, and NATO/UN sources to produce consistent series in constant 2023 USD and as percentage of GDP, updated annually in wide Excel format (1949–2024). The SIPRI Arms Transfers Database provides bilateral transfer values in millions of SIPRI TIVs by exporter/recipient/year. Key issues include missing coverage for low-income or conflict-affected states, country naming inconsistencies requiring ISO3 code harmonization, aggregate regions in WDI that must be removed, and occasional historical revisions that make results version-specific to the December 2024 download date.
+
 ## Missing value analysis
+
+```{r}
+## Missing value analysis for RQ1 dataset (wealth & spending)
+
+library(tidyverse)
+library(readr)
+
+# Ensure output directory exists
+dir.create("figures", showWarnings = FALSE)
+
+# -------------------------------------------------------------------
+# 1. Load RQ1 dataset (wealth & spending)
+# -------------------------------------------------------------------
+
+# Prefer RDS (if created by Clean_data.R), fall back to CSV
+if (file.exists("data/clean/rq1_wealth_spending.rds")) {
+  rq1 <- read_rds("data/clean/rq1_wealth_spending.rds")
+} else if (file.exists("data/clean/rq1_wealth_spending.csv")) {
+  rq1 <- read_csv("data/clean/rq1_wealth_spending.csv", show_col_types = FALSE)
+} else {
+  stop("RQ1 dataset not found. Run Clean_data.R first.")
+}
+
+# Keep only analysis variables (drop identifiers when needed)
+id_cols <- c("country", "iso3c", "year", "region", "subregion", "region_custom")
+
+numeric_vars <- rq1 %>%
+  select(-all_of(id_cols))
+
+# -------------------------------------------------------------------
+# 2. Graph 1: Missingness by variable (bar chart)
+# -------------------------------------------------------------------
+
+missing_by_var <- numeric_vars %>%
+  summarise(across(everything(), ~ mean(is.na(.)) * 100)) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "pct_missing") %>%
+  arrange(desc(pct_missing))
+
+print(missing_by_var)
+
+p_missing_by_var <- missing_by_var %>%
+  ggplot(aes(x = reorder(variable, pct_missing), y = pct_missing)) +
+  geom_col(fill = "#2c7fb8") +
+  coord_flip() +
+  labs(
+    title = "Share of Missing Values by Variable (RQ1 dataset)",
+    x = "Variable",
+    y = "Percent missing"
+  ) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_minimal()
+
+
+# -------------------------------------------------------------------
+# 3. Graph 2: Missingness over time by variable (line plot)
+# -------------------------------------------------------------------
+
+missing_by_year_var <- rq1 %>%
+  select(year, all_of(colnames(numeric_vars))) %>%
+  pivot_longer(
+    cols = -year,
+    names_to = "variable",
+    values_to = "value"
+  ) %>%
+  group_by(year, variable) %>%
+  summarise(
+    pct_missing = mean(is.na(value)) * 100,
+    .groups = "drop"
+  )
+
+print(missing_by_year_var %>% filter(pct_missing > 0) %>% slice_head(n = 20))
+
+p_missing_by_year_var <- missing_by_year_var %>%
+  ggplot(aes(x = year, y = pct_missing, color = variable)) +
+  geom_line(alpha = 0.8, linewidth = 0.7) +
+  labs(
+    title = "Percent Missing by Year and Variable (RQ1 dataset)",
+    x = "Year",
+    y = "Percent missing",
+    color = "Variable"
+  ) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_minimal()
+
+ggsave("figures/missing_by_year_variable_rq1.png", p_missing_by_year_var, width = 7, height = 4, dpi = 300)
+
+
+```
+
+```{r}
+p_missing_by_year_var
+```
+
+```{r}
+p_missing_by_var
+```
