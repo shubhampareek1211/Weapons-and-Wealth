@@ -30,16 +30,15 @@ rq2_data <- read_csv("data/clean/rq2_arms_races.csv")
 
 ## RQ1: How Does Military Spending Relate to National Wealth?
 
-[YOUR INTRODUCTORY TEXT FOR RQ1 HERE - Write your own narrative explaining what you're investigating and why]
 
 ### Wealth vs. Defense Burden
 
 
 ```{r}
-# =============================================================================
+
 # RQ1: Military Spending vs. National Wealth
 # Log-scale scatterplot with regional coloring and labeled outliers
-# =============================================================================
+
 
 library(tidyverse)
 library(scales)
@@ -48,9 +47,9 @@ library(ggrepel)
 # Load data
 rq1_data <- read_csv("data/clean/rq1_wealth_spending.csv")
 
-# -----------------------------------------------------------------------------
+
 # Data Preparation
-# -----------------------------------------------------------------------------
+
 
 rq1_scatter <- rq1_data |>
   filter(year == 2023) |>
@@ -71,9 +70,9 @@ rq1_scatter <- rq1_data |>
   ) |>
   filter(!is.na(region_label))
 
-# -----------------------------------------------------------------------------
+
 # Countries to Label
-# -----------------------------------------------------------------------------
+
 
 label_countries <- c(
   "United States", "China", "Russia", "India",
@@ -85,9 +84,9 @@ label_countries <- c(
 rq1_scatter <- rq1_scatter |>
   mutate(label = if_else(country %in% label_countries, country, NA_character_))
 
-# -----------------------------------------------------------------------------
+
 # Calculate R-squared
-# -----------------------------------------------------------------------------
+
 
 cor_value <- cor(
   log10(rq1_scatter$gdp_per_capita_usd),
@@ -96,9 +95,9 @@ cor_value <- cor(
 )
 r_squared <- round(cor_value^2, 3)
 
-# -----------------------------------------------------------------------------
+
 # Create Plot
-# -----------------------------------------------------------------------------
+
 
 ggplot(rq1_scatter, aes(x = gdp_per_capita_usd, y = spending_pct)) +
   geom_point(aes(color = region_label), alpha = 0.7, size = 3) +
@@ -167,7 +166,7 @@ ggplot(rq1_scatter, aes(x = gdp_per_capita_usd, y = spending_pct)) +
 ```
 
 
-[YOUR INTERPRETATION OF THE SCATTERPLOT HERE - Discuss patterns you observe, outliers, what the relationship reveals]
+
 
 The main finding is clear: wealth explains almost nothing (R² ≈ 0). The nearly flat trend line confirms that a country's GDP per capita has little bearing on its defense burden. Instead, regional clustering dominates — Middle Eastern countries (yellow) sit high regardless of wealth, while European nations (pink) cluster low.
 Notable outliers tell the real story:
@@ -189,18 +188,14 @@ https://www.sipri.org/sites/default/files/2025-04/2504_fs_milex_2024.pdf
 
 
 ```{r}
-# =============================================================================
-# Bump Chart with Event Annotations (Including USA)
-# =============================================================================
+
 
 library(tidyverse)
 
 # Assuming data is already loaded as per your previous code
 # rq1_data <- read_csv("data/clean/rq1_wealth_spending.csv")
 
-# -----------------------------------------------------------------------------
-# Prepare data
-# -----------------------------------------------------------------------------
+
 
 highlight_countries <- c(
   "United States of America", "China", "Russia", "India", "Ukraine",
@@ -228,9 +223,9 @@ events <- tribble(
   2022, "Ukraine\nInvasion", 12
 )
 
-# -----------------------------------------------------------------------------
+
 # Create annotated bump chart
-# -----------------------------------------------------------------------------
+
 
 ggplot(rank_data, aes(x = year, y = rank, color = country, group = country)) +
   # --- Event Markers (Vertical Lines) ---
@@ -568,7 +563,7 @@ ggplot(rq1_regional, aes(x = median_spending, y = region_custom)) +
         panel.grid.major.y = element_blank())
 ```
 
-[YOUR INTERPRETATION OF THE CLEVELAND PLOT HERE - Discuss regional patterns, which regions spend most/least]
+
 
 Clear regional hierarchy:
 
@@ -627,7 +622,7 @@ ggplot(rq1_regional_ts, aes(x = year, y = median_spending, color = region_label)
   guides(color = guide_legend(nrow = 1))
 ```
 
-[YOUR INTERPRETATION OF REGIONAL TRENDS HERE - Discuss how regions respond differently to global events]
+
 
 
 ```{r}
@@ -640,9 +635,9 @@ library(ggrepel)
 # Load data
 rq1_data <- read_csv("data/clean/rq1_wealth_spending.csv")
 
-# -----------------------------------------------------------------------------
+
 # Define Conflict Countries
-# -----------------------------------------------------------------------------
+
 
 conflict_countries <- c(
 
@@ -677,10 +672,9 @@ conflict_countries <- c(
   "United States", "United Kingdom", "Germany", "France"
 )
 
-# =============================================================================
-# OPTION 5: Bubble Chart
+
 # X = GDP per capita, Y = Spending % GDP, Size = Absolute spending
-# =============================================================================
+
 
 bubble_data <- rq1_data |>
   filter(year == 2023) |>
@@ -906,7 +900,6 @@ They remain closely matched in burden despite India's larger economy
 
 ## RQ2: What Spending Patterns Emerge Among Regional Rivals?
 
-[YOUR INTRODUCTORY TEXT FOR RQ2 HERE - Explain the concept of arms races and why studying rival pairs matters]
 
 
 ## Armenia-Azerbaijan Deep Dive (Small Multiples Over Time)
@@ -1168,7 +1161,7 @@ The divergence: Saudi Arabia's spending tracks oil prices and regional threats. 
 
 
 
-[YOUR INTERPRETATION OF RIVAL PAIRS PATTERNS HERE]
+
 
 ### Top Arms Importers
 
@@ -1297,18 +1290,18 @@ These six graphs collectively reveal that military rivalries follow predictable 
 ### Arms Race Dynamics: Lagged Correlation Analysis
 
 ```{r rq2-lag-analysis}
-# =============================================================================
+
 # RQ2: Lagged Correlation Analysis - India vs Pakistan
-# =============================================================================
+
 
 library(tidyverse)
 library(scales)
 
 rq2_data <- read_csv("data/clean/rq2_arms_races.csv")
 
-# -----------------------------------------------------------------------------
+
 # Data Preparation (using dplyr:: prefix to avoid conflicts)
-# -----------------------------------------------------------------------------
+
 
 india_data <- rq2_data |>
   filter(country == "India", year >= 1975) |>
@@ -1333,9 +1326,9 @@ india_pak_lag <- india_data |>
 # Calculate correlation
 cor_val <- cor(india_pak_lag$india_lag1, india_pak_lag$pakistan_spending)
 
-# -----------------------------------------------------------------------------
+
 # Create Plot
-# -----------------------------------------------------------------------------
+
 
 ggplot(india_pak_lag, aes(x = india_lag1, y = pakistan_spending)) +
   geom_point(aes(color = year), size = 3.5, alpha = 0.8) +
@@ -1384,18 +1377,18 @@ Pakistan maintains higher burden despite smaller econom
 ### Arms Imports by Regional Rivals
 
 ```{r}
-# =============================================================================
+
 # RQ2: Lagged Correlation Analysis - Armenia vs Azerbaijan
-# =============================================================================
+
 
 library(tidyverse)
 library(scales)
 
 rq2_data <- read_csv("data/clean/rq2_arms_races.csv")
 
-# -----------------------------------------------------------------------------
+
 # Data Preparation
-# -----------------------------------------------------------------------------
+
 
 armenia_data <- rq2_data |>
   filter(country == "Armenia", year >= 1992) |>
@@ -1421,9 +1414,9 @@ arm_aze_lag <- armenia_data |>
 # Calculate correlation
 cor_val <- cor(arm_aze_lag$armenia_lag1, arm_aze_lag$azerbaijan_spending)
 
-# -----------------------------------------------------------------------------
+
 # Create Plot
-# -----------------------------------------------------------------------------
+
 
 ggplot(arm_aze_lag, aes(x = armenia_lag1, y = azerbaijan_spending)) +
   geom_point(aes(color = year), size = 3.5, alpha = 0.8) +
@@ -1451,9 +1444,9 @@ ggplot(arm_aze_lag, aes(x = armenia_lag1, y = azerbaijan_spending)) +
 
 
 ```{r}
-# -----------------------------------------------------------------------------
+
 # Reverse: Does Azerbaijan's spending predict Armenia's response?
-# -----------------------------------------------------------------------------
+
 
 arm_aze_lag_reverse <- armenia_data |>
   inner_join(azerbaijan_data, by = "year") |>
@@ -1492,6 +1485,3 @@ ggplot(arm_aze_lag_reverse, aes(x = azerbaijan_lag1, y = armenia_spending)) +
 Yellow points (recent years) in upper-right: Both increased spending before 2020 war
 Armenia's responses are more predictable
 
-
-
-[YOUR INTERPRETATION OF ARMS IMPORTS COMPARISON HERE]
