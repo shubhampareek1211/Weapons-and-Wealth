@@ -15,3 +15,5 @@ https://data.worldbank.org/indicator/MS.MIL.XPND.GD.ZS
 
 For the arms transfer data 
 https://armstransfers.sipri.org/ArmsTransfer/TransferData
+
+Originally developed in collaboration with [ShreyasK412](https://github.com/ShreyasK412)
